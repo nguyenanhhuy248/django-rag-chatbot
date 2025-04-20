@@ -17,10 +17,13 @@ repos:
     rev: v1.10.0
     hooks:
       - id: python-use-type-annotations
-  - repo: https://github.com/pylint-dev/pylint
-    rev: v3.1.0
+  - repo: local
     hooks:
       - id: pylint
+        name: pylint
+        entry: poetry run pylint
+        language: system
+        types: [python]
   - repo: https://github.com/asottile/setup-cfg-fmt
     rev: v2.5.0
     hooks:
