@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "django-rag-chatbot"
+version = "0.1.0"
+description = "A Django web application with chatbot UI and user authentication"
+authors = ["Huy Nguyen <nguyenanhhuy248@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.5"
+python-dotenv = "^1.0.1"
+django-crispy-forms = "^2.1"
+crispy-bootstrap5 = "^2024.2"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
