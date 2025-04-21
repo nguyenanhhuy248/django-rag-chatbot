@@ -28,7 +28,7 @@ def chat_home(request):
     Returns:
         Rendered template with chat messages.
     """
-    messages = ChatMessage.objects.filter(user=request.user)
+    messages = ChatMessage.objects.filter(user=request.user).order_by('timestamp')
     return render(request, 'chat/chat_home.html', {'messages': messages})
 
 

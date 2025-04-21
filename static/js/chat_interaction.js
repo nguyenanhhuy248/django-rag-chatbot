@@ -10,6 +10,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   scrollToBottom();
 
+  function getCurrentDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const day = String(now.getDate()).padStart(2, "0");
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
   // Add message to chat
   function addMessage(message, isUser = true) {
     const messageDiv = document.createElement("div");
@@ -21,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const timeDiv = document.createElement("div");
     timeDiv.className = "message-time";
-    timeDiv.textContent = new Date().toLocaleString();
+    timeDiv.textContent = getCurrentDateTime();
 
     messageDiv.appendChild(contentDiv);
     messageDiv.appendChild(timeDiv);
