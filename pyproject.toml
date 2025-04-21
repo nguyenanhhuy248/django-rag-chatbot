@@ -13,7 +13,7 @@ crispy-bootstrap5 = "^2024.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
-pylint = "^3.3.6"
+pylint-django = "^2.6.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
