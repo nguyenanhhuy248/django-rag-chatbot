@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('chat.urls')),
     path('accounts/', include('accounts.urls')),
+    path('documents/', include('documents.urls')),
     path(
         'login/',
         auth_views.LoginView.as_view(template_name='accounts/login.html'),

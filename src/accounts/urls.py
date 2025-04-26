@@ -13,4 +13,5 @@ app_name = 'accounts'
 
 urlpatterns = [
     path('register/', views.register, name='register'),
+    path('settings/', views.account_settings, name='account_settings'),
 ]

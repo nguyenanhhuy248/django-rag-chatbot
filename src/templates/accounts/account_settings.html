@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block title %}Account
+Settings{% endblock %} {% block content %}
+<div class="container mt-4">
+  <h2>Account Settings</h2>
+
+  <!-- Password Change Form -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Change Password</h5>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="password_change" value="1" />
+        {{ password_form|crispy }}
+        <button type="submit" class="btn btn-primary mt-3">
+          Change Password
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- API Keys Form -->
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">API Keys</h5>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="api_keys" value="1" />
+        {{ api_form|crispy }}
+        <button type="submit" class="btn btn-primary mt-3">
+          Save API Keys
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
