@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block title %}Document
+Management{% endblock %} {% block content %}
+<div class="container mt-4">
+  <h2>Document Management</h2>
+
+  <!-- File Upload Form -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Upload New Documents</h5>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} {{ form|crispy }}
+        <div class="form-text mb-3">
+          You can select multiple files to upload at once.
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Upload</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Documents Table -->
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Uploaded Documents</h5>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th>File Type</th>
+              <th>Size</th>
+              <th>Uploaded By</th>
+              <th>Upload Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for document in page_obj %}
+            <tr>
+              <td>{{ document.get_filename }}</td>
+              <td>{{ document.file_type }}</td>
+              <td>{{ document.file_size|filesizeformat }}</td>
+              <td>{{ document.uploaded_by.username }}</td>
+              <td>{{ document.uploaded_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">
+                No documents uploaded yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.previous_page_number }}"
+              >Previous</a
+            >
+          </li>
+          {% endif %} {% for num in page_obj.paginator.page_range %}
+          <li
+            class="page-item {% if page_obj.number == num %}active{% endif %}"
+          >
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+          {% endfor %} {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+              >Next</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
