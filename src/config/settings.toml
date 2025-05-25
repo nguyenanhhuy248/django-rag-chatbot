@@ -1,0 +1,35 @@
+[default]
+debug = true
+allowed_hosts = []
+language_code = "en-us"
+time_zone = "UTC"
+use_i18n = true
+use_tz = true
+
+# Static and Media files
+static_url = "static/"
+media_url = "media/"
+
+# Crispy Forms
+crispy_allowed_template_packs = "bootstrap5"
+crispy_template_pack = "bootstrap5"
+
+# Authentication
+login_redirect_url = "chat:chat_home"
+logout_redirect_url = "login"
+login_url = "login"
+
+# Model configurations for embeddings
+[model_configs.all-MiniLM-L6-v2]
+name = "all-MiniLM-L6-v2"
+key_field = ""
+
+[model_configs.openai]
+name = "text-embedding-3-small"
+key_field = "openai_api_key"
+
+[development]
+debug = true
+
+[production]
+debug = false
