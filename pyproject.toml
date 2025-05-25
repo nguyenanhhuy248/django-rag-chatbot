@@ -5,11 +5,18 @@ description = "A Django web application with chatbot UI and user authentication"
 authors = ["Huy Nguyen <nguyenanhhuy248@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.10,<3.12"
 django = "^5.1.5"
 python-dotenv = "^1.0.1"
 django-crispy-forms = "^2.1"
 crispy-bootstrap5 = "^2024.2"
+unstructured = {extras = ["pdf"], version = "^0.17.2"}
+semantic-text-splitter = "^0.25.1"
+chromadb = "^1.0.7"
+sentence-transformers = "^4.1.0"
+dynaconf = "^3.2.11"
+langchain-community = "^0.3.23"
+langchain-huggingface = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
