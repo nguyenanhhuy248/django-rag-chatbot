@@ -18,8 +18,6 @@ class UserProfile(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     openai_api_key = models.CharField(max_length=255, blank=True, null=True)
-    anthropic_api_key = models.CharField(max_length=255, blank=True, null=True)
-    google_api_key = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"

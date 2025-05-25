@@ -20,9 +20,7 @@ class APIKeyForm(forms.ModelForm):
     """Form for managing API keys in user profile."""
     class Meta:
         model = UserProfile
-        fields = ['openai_api_key', 'anthropic_api_key', 'google_api_key']
+        fields = ['openai_api_key']
         widgets = {
             'openai_api_key': forms.PasswordInput(attrs={'class': 'form-control'}),
-            'anthropic_api_key': forms.PasswordInput(attrs={'class': 'form-control'}),
-            'google_api_key': forms.PasswordInput(attrs={'class': 'form-control'}),
         }
