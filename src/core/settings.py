@@ -11,27 +11,21 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
+from config import dynaconf_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    'django-dummy-key-to-be-changed-in-production',
-)
+SECRET_KEY = dynaconf_settings.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = dynaconf_settings.debug
 
-ALLOWED_HOSTS: list[str] = []
+ALLOWED_HOSTS = dynaconf_settings.allowed_hosts
 
 # Application definition
 INSTALLED_APPS = [
@@ -117,28 +111,28 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
+LANGUAGE_CODE = dynaconf_settings.language_code
+TIME_ZONE = dynaconf_settings.time_zone
+USE_I18N = dynaconf_settings.use_i18n
+USE_TZ = dynaconf_settings.use_tz
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = dynaconf_settings.static_url
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
-MEDIA_URL = 'media/'
+MEDIA_URL = dynaconf_settings.media_url
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Crispy Forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = dynaconf_settings.crispy_allowed_template_packs
+CRISPY_TEMPLATE_PACK = dynaconf_settings.crispy_template_pack
 
 # Authentication settings
-LOGIN_REDIRECT_URL = 'chat:chat_home'
-LOGOUT_REDIRECT_URL = 'login'
-LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = dynaconf_settings.login_redirect_url
+LOGOUT_REDIRECT_URL = dynaconf_settings.logout_redirect_url
+LOGIN_URL = dynaconf_settings.login_url
