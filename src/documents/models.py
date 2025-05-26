@@ -49,11 +49,10 @@ class Document(models.Model):
 
 
 class DocumentChunk(models.Model):
-    """Model for storing document chunks with embeddings."""
+    """Model for storing document chunks."""
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='chunks')
     content = models.TextField()
     chunk_index = models.IntegerField()
-    embedding = models.JSONField(help_text='Vector embedding of the chunk')
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
