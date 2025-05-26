@@ -5,17 +5,20 @@ import os
 from typing import Any
 
 import chromadb
+import torch
 from accounts.models import UserProfile
 from chromadb.config import Settings
 from config import dynaconf_settings
 from django.conf import settings as django_settings
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
-from semantic_text_splitter import TextSplitter
+from semantic_text_splitter.semantic_text_splitter import TextSplitter  # pylint: disable=E0611
 from unstructured.partition.auto import partition
 
 from .models import Document
 from .models import DocumentChunk
+
+chromadb.api.client.SharedSystemClient.clear_system_cache()
 
 
 class DocumentProcessor:
@@ -43,15 +46,25 @@ class DocumentProcessor:
 
     def _setup_embeddings(self) -> Any:
         """Set up embeddings with available API keys."""
-        if not self.model or self.model not in dynaconf_settings.get('model_configs', {}):
-            self.model = 'all-MiniLM-L6-v2'  # Default to all-MiniLM-L6-v2 if no model specified or invalid
+        model_configs = dynaconf_settings.get('model_configs', {})
+        if not self.model or self.model not in model_configs:
+            # Default to all-MiniLM-L6-v2 if no model specified or invalid
+            self.model = 'all-MiniLM-L6-v2'
 
         model_config = dynaconf_settings.get('model_configs', {}).get(self.model, {})
 
         if self.model == 'all-MiniLM-L6-v2':
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
             return HuggingFaceEmbeddings(
                 model_name=model_config.get('name', 'all-MiniLM-L6-v2'),
-                model_kwargs={'device': 'cpu'},
+                model_kwargs={
+                    'device': device,
+                },
+                encode_kwargs={
+                    'normalize_embeddings': model_config.get('normalize_embeddings', True),
+                    'convert_to_tensor': True,
+                },
             )
 
         # For API-based models
