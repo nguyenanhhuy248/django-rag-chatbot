@@ -36,6 +36,7 @@ class DocumentProcessor:
         self.embeddings = self._setup_embeddings()
         self.chroma_client = chromadb.Client(
             Settings(
+                is_persistent=True,
                 persist_directory=os.path.join(django_settings.BASE_DIR, 'chroma_db'),
             ),
         )
@@ -114,7 +115,6 @@ class DocumentProcessor:
                     document=document,
                     content=chunk,
                     chunk_index=i,
-                    embedding=embedding,
                     metadata={
                         'filename': document.get_filename(),
                         'chunk_size': len(chunk),
