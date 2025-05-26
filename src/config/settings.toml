@@ -1,6 +1,6 @@
 [default]
 debug = true
-allowed_hosts = []
+allowed_hosts = ["*"]
 language_code = "en-us"
 time_zone = "UTC"
 use_i18n = true
