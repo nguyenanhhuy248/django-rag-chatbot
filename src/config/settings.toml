@@ -19,14 +19,22 @@ login_redirect_url = "chat:chat_home"
 logout_redirect_url = "login"
 login_url = "login"
 
-# Model configurations for embeddings
-[model_configs.all-MiniLM-L6-v2]
-name = "all-MiniLM-L6-v2"
-key_field = ""
+# Model configuration
+[default.model_configs]
+embeddings_model = "all-MiniLM-L6-v2"
+chat_model = "deepseek"
 
-[model_configs.openai]
-name = "text-embedding-3-small"
-key_field = "openai_api_key"
+[default.model_configs.all-MiniLM-L6-v2]
+api_url = ""
+version = "all-MiniLM-L6-v2"
+
+[default.model_configs.openai]
+api_url = "https://api.openai.com/v1/embeddings"
+version = "text-embedding-3-small"
+
+[default.model_configs.deepseek]
+api_url = "https://openrouter.ai/api/v1"
+version = "deepseek-chat-v3-0324:free"
 
 [development]
 debug = true
