@@ -25,7 +25,8 @@ Assistant{% endblock %} {% block extra_css %}
     </div>
   </div>
   <div class="chat-input">
-    <form id="chatForm" class="d-flex gap-2">
+    <form id="chatForm" class="d-flex gap-2" method="post">
+      {% csrf_token %}
       <input
         type="text"
         id="messageInput"
