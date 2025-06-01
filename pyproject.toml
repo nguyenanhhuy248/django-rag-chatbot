@@ -23,9 +23,6 @@ openai = "^1.82.1"
 pre-commit = "^4.2.0"
 pylint-django = "^2.6.1"
 
-[tool.pylint.messages_control]
-disable = ["C0411", "C0412"]  # Disable import-order related warnings
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
