@@ -47,16 +47,16 @@ class DocumentProcessor:
 
     def _setup_embeddings(self) -> Any:
         """Set up embeddings with available API keys."""
-        model_configs = dynaconf_settings.get('model_configs', {})
-        if not self.model or self.model not in model_configs:
-            # Default to all-MiniLM-L6-v2 if no model specified or invalid
+
+        embeddings_models = dynaconf_settings.get('model_configs', {}).get('embeddings_models', '')
+        if not self.model or self.model not in embeddings_models:
+            # Default to all-MiniLM-L6-v2 if no model specified
             self.model = 'all-MiniLM-L6-v2'
 
         model_config = dynaconf_settings.get('model_configs', {}).get(self.model, {})
 
         if self.model == 'all-MiniLM-L6-v2':
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
             return HuggingFaceEmbeddings(
                 model_name=model_config.get('name', 'all-MiniLM-L6-v2'),
                 model_kwargs={
@@ -74,6 +74,7 @@ class DocumentProcessor:
             api_key = getattr(self.user_profile, model_config.get('key_field', ''))
 
         return OpenAIEmbeddings(
+            openai_api_base=model_config.get('api_url'),
             openai_api_key=api_key,
             model=model_config.get('name', 'text-embedding-3-small'),
         )

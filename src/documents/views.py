@@ -5,6 +5,8 @@ This module contains the views for the documents application.
 """
 from __future__ import annotations
 
+import os
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -18,6 +20,8 @@ from .models import Document
 from .processors import DocumentProcessor
 
 # Create your views here.
+
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 
 @login_required

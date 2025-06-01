@@ -21,7 +21,7 @@ login_url = "login"
 
 # Model configuration
 [default.model_configs]
-embeddings_model = "all-MiniLM-L6-v2"
+embeddings_models = ["all-MiniLM-L6-v2"]
 chat_model = "deepseek"
 
 [default.model_configs.all-MiniLM-L6-v2]
