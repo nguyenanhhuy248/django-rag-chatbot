@@ -4,6 +4,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const chatMessages = document.getElementById("chatMessages");
   const typingIndicator = document.getElementById("typingIndicator");
 
+  // Format markdown text
+  function formatMarkdown(text) {
+    // Replace headings (h1-h6)
+    text = text.replace(/^### (.*$)/gm, "<h3>$1</h3>");
+    text = text.replace(/^## (.*$)/gm, "<h2>$1</h2>");
+    text = text.replace(/^# (.*$)/gm, "<h1>$1</h1>");
+
+    // Replace bold text
+    text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Replace italic text
+    text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    // Replace code blocks
+    text = text.replace(/`(.*?)`/g, "<code>$1</code>");
+
+    // Replace blockquotes
+    text = text.replace(/^> (.*$)/gm, "<blockquote>$1</blockquote>");
+
+    // Add line breaks
+    text = text.replace(/\n/g, "<br>");
+
+    return text;
+  }
+
+  // Apply formatMarkdown to all initial bot messages
+  document.querySelectorAll(".bot-markdown").forEach(function (div) {
+    div.innerHTML = formatMarkdown(div.textContent);
+  });
+
   // Scroll to bottom of chat
   function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -31,7 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
-    contentDiv.textContent = message;
+    // Format markdown for bot messages
+    contentDiv.innerHTML = isUser ? message : formatMarkdown(message);
 
     const timeDiv = document.createElement("div");
     timeDiv.className = "message-time";

@@ -10,7 +10,7 @@ Assistant{% endblock %} {% block extra_css %}
       <div class="message-time">{{ message.timestamp|date:"Y-m-d H:i:s" }}</div>
     </div>
     <div class="message bot">
-      <div class="message-content">{{ message.response }}</div>
+      <div class="message-content bot-markdown">{{ message.response }}</div>
       <div class="message-time">{{ message.timestamp|date:"Y-m-d H:i:s" }}</div>
     </div>
     {% endfor %}
@@ -38,6 +38,4 @@ Assistant{% endblock %} {% block extra_css %}
     </form>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
-<script src="{% static 'js/chat_interaction.js' %}"></script>
-{% endblock %}
+{% endblock %} {% block extra_js %} {% endblock %}
