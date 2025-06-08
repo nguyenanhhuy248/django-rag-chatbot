@@ -26,13 +26,27 @@ def build_rag_chain(
     if prompt_template is None:
         prompt_template = (
             'You are a helpful assistant. Use the following context to answer the question.\n'
-            'Context:\n{context}\n\nQuestion: {question}\nAnswer:'
+            'When referencing information from the context, '
+            'please cite the source and include relevant quotes.\n\n'
+            'For example:\n'
+            '   Source: [Document Name]\n'
+            '   Quote: "[relevant quote]"\n'
+            'You should use markdown formatting for emphasis:\n'
+            '   - Use **text** for bold\n'
+            '   - Use *text* for italic\n'
+            '   - Use `text` for code\n'
+            'Context:\n{context}\n\n'
+            'Question: {question}\n\n'
+            'Answer:'
         )
 
     def rag_fn(question: str) -> str:
         """Retrieve documents and generate an answer using the chat client."""
         docs = retriever(question, 4)
-        context = '\n'.join(d['content'] for d in docs)
+        context = '\n'.join(
+            f"Document: {d['metadata'].get('filename', 'Unknown')}\nContent: {d['content']}"
+            for d in docs
+        )
         prompt = prompt_template.format(context=context, question=question)
         return chat_client(prompt, api_key=api_key, model=model)
     return rag_fn
