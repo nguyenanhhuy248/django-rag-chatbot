@@ -118,4 +118,24 @@ document.addEventListener("DOMContentLoaded", function () {
       setTypingIndicator(false);
     }
   });
+
+  // --- New Chat Button Logic ---
+  const newConversationBtn = document.getElementById("newConversationBtn");
+  if (newConversationBtn) {
+    newConversationBtn.addEventListener("click", function () {
+      // Clear chat window and reset conversation state
+      chatMessages.innerHTML = "";
+      chatMessages.appendChild(typingIndicator);
+      scrollToBottom();
+      // Remove active class from all conversation previews
+      document
+        .querySelectorAll(".conversation-preview")
+        .forEach((el) => el.classList.remove("active"));
+      // Focus the input
+      messageInput.value = "";
+      messageInput.focus();
+      // Set a flag or variable if you want to track new conversation state
+      window.currentConversationId = null;
+    });
+  }
 });

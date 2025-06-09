@@ -2,40 +2,232 @@
 Assistant{% endblock %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chat_home.css' %}" />
 {% endblock %} {% block content %}
-<div class="chat-container">
-  <div class="chat-messages" id="chatMessages">
-    {% for message in messages %}
-    <div class="message user">
-      <div class="message-content">{{ message.message }}</div>
-      <div class="message-time">{{ message.timestamp|date:"Y-m-d H:i:s" }}</div>
+<div class="chat-layout">
+  <div class="chat-sidebar">
+    <button
+      id="newConversationBtn"
+      class="btn btn-sm btn-outline-primary w-100 mb-2"
+    >
+      + New Chat
+    </button>
+    {% for conv, first_msg in conversation_previews %}
+    <div
+      class="conversation-preview{% if conv.id == selected_conversation.id %} active{% endif %}"
+      data-conversation-id="{{ conv.id }}"
+      style="display: flex; align-items: center; justify-content: space-between"
+    >
+      <span
+        style="
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        "
+      >
+        {% if first_msg %} {% with preview=first_msg.message|truncatewords:5 %}
+        {{ preview }}{% if first_msg.message|length > preview|length %}...{%
+        endif %} {% endwith %} {% else %} (No messages) {% endif %}
+      </span>
+      <button
+        class="btn btn-link btn-sm text-danger delete-conversation-btn"
+        data-conversation-id="{{ conv.id }}"
+        title="Delete"
+        style="padding: 0 0.25rem; margin-left: 0.5rem"
+      >
+        <i class="fas fa-trash"></i>
+      </button>
     </div>
-    <div class="message bot">
-      <div class="message-content bot-markdown">{{ message.response }}</div>
-      <div class="message-time">{{ message.timestamp|date:"Y-m-d H:i:s" }}</div>
-    </div>
+    {% empty %}
+    <div class="text-muted px-3">No conversations</div>
     {% endfor %}
-    <div class="typing-indicator" id="typingIndicator">
+  </div>
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+      {% for message in messages %}
+      <div class="message user">
+        <div class="message-content">{{ message.message }}</div>
+        <div class="message-time">
+          {{ message.timestamp|date:"Y-m-d H:i:s" }}
+        </div>
+      </div>
       <div class="message bot">
-        <div class="message-content">
-          <span></span>
-          <span></span>
-          <span></span>
+        <div class="message-content bot-markdown">{{ message.response }}</div>
+        <div class="message-time">
+          {{ message.timestamp|date:"Y-m-d H:i:s" }}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="message bot">
+          <div class="message-content">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="chat-input">
-    <form id="chatForm" class="d-flex gap-2" method="post">
-      {% csrf_token %}
-      <input
-        type="text"
-        id="messageInput"
-        class="form-control"
-        placeholder="Type your message..."
-        required
-      />
-      <button type="submit" class="btn btn-primary">Send</button>
-    </form>
+    <div class="chat-input">
+      <form id="chatForm" class="d-flex gap-2" method="post">
+        {% csrf_token %}
+        <input
+          type="text"
+          id="messageInput"
+          class="form-control"
+          placeholder="Type your message..."
+          required
+        />
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %} {% endblock %}
+{% endblock %} {% block extra_js %}
+<script>
+  const chatMessages = document.getElementById("chatMessages");
+  const chatForm = document.getElementById("chatForm");
+  const messageInput = document.getElementById("messageInput");
+  const typingIndicator = document.getElementById("typingIndicator");
+  let currentConversationId = "{{ selected_conversation.id|default:'' }}";
+  if (!currentConversationId) currentConversationId = null;
+
+  function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function renderMessages(messages) {
+    chatMessages.innerHTML = "";
+    messages.forEach((msg) => {
+      chatMessages.innerHTML += `
+      <div class="message user">
+        <div class="message-content">${msg.message}</div>
+        <div class="message-time">${msg.timestamp}</div>
+      </div>
+      <div class="message bot">
+        <div class="message-content bot-markdown">${msg.response}</div>
+        <div class="message-time">${msg.timestamp}</div>
+      </div>
+    `;
+    });
+    chatMessages.appendChild(typingIndicator);
+    // Format markdown for all bot messages after rendering
+    document.querySelectorAll(".bot-markdown").forEach(function (div) {
+      if (window.formatMarkdown) {
+        div.innerHTML = window.formatMarkdown(div.textContent);
+      }
+    });
+    scrollToBottom();
+  }
+
+  function loadConversation(conversationId) {
+    fetch(`/conversation/${conversationId}/`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          renderMessages(data.messages);
+          currentConversationId = conversationId;
+          document.querySelectorAll(".conversation-preview").forEach((el) => {
+            el.classList.toggle(
+              "active",
+              el.dataset.conversationId == conversationId,
+            );
+          });
+        }
+      });
+  }
+
+  document.querySelectorAll(".conversation-preview").forEach((el) => {
+    el.addEventListener("click", function () {
+      const convId = this.dataset.conversationId;
+      loadConversation(convId);
+    });
+  });
+
+  document
+    .getElementById("newConversationBtn")
+    .addEventListener("click", function () {
+      // Start a new conversation (no conversation_id)
+      currentConversationId = null;
+      renderMessages([]);
+      document
+        .querySelectorAll(".conversation-preview")
+        .forEach((el) => el.classList.remove("active"));
+    });
+
+  chatForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+    if (!message) return;
+    typingIndicator.style.display = "block";
+    fetch("/chat/send_message/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({ message, conversation_id: currentConversationId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        typingIndicator.style.display = "none";
+        if (data.status === "success") {
+          if (!currentConversationId && data.conversation_id) {
+            // Reload page to show new conversation in sidebar
+            window.location = `?conversation=${data.conversation_id}`;
+          } else {
+            loadConversation(currentConversationId);
+          }
+          messageInput.value = "";
+        } else {
+          alert(data.message || "Error sending message");
+        }
+      });
+  });
+
+  document.querySelectorAll(".delete-conversation-btn").forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const convId = this.dataset.conversationId;
+      if (confirm("Are you sure you want to delete this conversation?")) {
+        fetch(`/conversation/${convId}/delete/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              // Remove the conversation from the sidebar
+              this.closest(".conversation-preview").remove();
+              // If the deleted conversation was active, clear the chat window
+              if (currentConversationId == convId) {
+                renderMessages([]);
+                currentConversationId = null;
+              }
+            } else {
+              alert(data.message || "Error deleting conversation");
+            }
+          });
+      }
+    });
+  });
+
+  function formatMarkdown(text) {
+    // Replace headings (h1-h6)
+    text = text.replace(/^### (.*$)/gm, "<h3>$1</h3>");
+    text = text.replace(/^## (.*$)/gm, "<h2>$1</h2>");
+    text = text.replace(/^# (.*$)/gm, "<h1>$1</h1>");
+    text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    text = text.replace(/`(.*?)`/g, "<code>$1</code>");
+    text = text.replace(/^> (.*$)/gm, "<blockquote>$1</blockquote>");
+    text = text.replace(/\n/g, "<br>");
+    return text;
+  }
+  window.formatMarkdown = formatMarkdown;
+
+  scrollToBottom();
+</script>
+{% endblock %}

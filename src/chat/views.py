@@ -15,6 +15,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import ChatMessage
+from .models import Conversation
 from .rag_pipeline import build_rag_chain
 from .rag_pipeline import get_default_retriever
 
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def chat_home(request):
     """
-    Display the chat interface.
+    Display the chat interface with conversation list and selected conversation messages.
 
     Args:
         request: The HTTP request object.
@@ -35,8 +36,31 @@ def chat_home(request):
     Returns:
         Rendered template with chat messages.
     """
-    messages = ChatMessage.objects.filter(user=request.user).order_by('timestamp')
-    return render(request, 'chat/chat_home.html', {'messages': messages})
+    conversations = Conversation.objects.filter(user=request.user).order_by('-created_at')
+    selected_conversation_id = request.GET.get('conversation')
+    if selected_conversation_id:
+        try:
+            selected_conversation = conversations.get(pk=selected_conversation_id)
+        except Conversation.DoesNotExist:
+            selected_conversation = conversations.first()
+    else:
+        selected_conversation = conversations.first()
+    messages = (
+        selected_conversation.messages.order_by('timestamp') if selected_conversation else []
+    )
+    # Prepare a list of (conversation, first_msg) for the sidebar
+    conversation_previews = [
+        (conv, conv.messages.order_by('timestamp').first())
+        for conv in conversations
+    ]
+    return render(
+        request, 'chat/chat_home.html', {
+            'conversations': conversations,
+            'selected_conversation': selected_conversation,
+            'messages': messages,
+            'conversation_previews': conversation_previews,
+        },
+    )
 
 
 @csrf_exempt
@@ -63,7 +87,15 @@ def send_message(request):
                 }, status=400,
             )
         user_message = data.get('message', '').strip()
-
+        conversation_id = data.get('conversation_id')
+        conversation = None
+        if conversation_id:
+            try:
+                conversation = Conversation.objects.get(pk=conversation_id, user=request.user)
+            except Conversation.DoesNotExist:
+                pass
+        if not conversation:
+            conversation = Conversation.objects.create(user=request.user)
         if user_message:
             # RAG chatbot pipeline
             retriever = get_default_retriever(
@@ -77,6 +109,7 @@ def send_message(request):
                 user=request.user,
                 message=user_message,
                 response=bot_response,
+                conversation=conversation,
             )
 
             return JsonResponse({
@@ -85,6 +118,7 @@ def send_message(request):
                 'timestamp': chat_message.timestamp.strftime(
                     '%Y-%m-%d %H:%M:%S',
                 ),
+                'conversation_id': conversation.id,
             })
 
         return JsonResponse(
@@ -100,3 +134,49 @@ def send_message(request):
             'message': 'Invalid request method',
         }, status=405,
     )
+
+
+@login_required
+def get_conversation_messages(request, conversation_id):
+    """
+    Return messages for a given conversation (AJAX endpoint).
+
+    Args:
+        request: The HTTP request object.
+        conversation_id: The ID of the conversation to retrieve messages for.
+
+    Returns:
+        JsonResponse with the conversation messages or error message.
+    """
+    try:
+        conversation = Conversation.objects.get(pk=conversation_id, user=request.user)
+    except Conversation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Conversation not found'}, status=404)
+    messages = [
+        {
+            'id': m.id,
+            'message': m.message,
+            'response': m.response,
+            'timestamp': m.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        for m in conversation.messages.order_by('timestamp')
+    ]
+    return JsonResponse({'status': 'success', 'messages': messages})
+
+
+@login_required
+def delete_conversation(request, conversation_id):
+    """
+    Delete a conversation and all its messages.
+    """
+    if request.method == 'POST':
+        try:
+            conversation = Conversation.objects.get(pk=conversation_id, user=request.user)
+            conversation.delete()
+            return JsonResponse({'status': 'success'})
+        except Conversation.DoesNotExist:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Conversation not found'},
+                status=404,
+            )
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
