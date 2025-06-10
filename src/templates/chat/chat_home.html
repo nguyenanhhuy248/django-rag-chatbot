@@ -24,9 +24,14 @@ Assistant{% endblock %} {% block extra_css %}
           white-space: nowrap;
         "
       >
-        {% if first_msg %} {% with preview=first_msg.message|truncatewords:5 %}
-        {{ preview }}{% if first_msg.message|length > preview|length %}...{%
-        endif %} {% endwith %} {% else %} (No messages) {% endif %}
+        {% if first_msg %} 
+          {% with preview=first_msg.message|truncatewords:5 %}{{ preview }}
+            {% if first_msg.message|length > preview|length %}...
+            {% endif %} 
+          {% endwith %} 
+        {% else %} 
+          (No messages) 
+        {% endif %}
       </span>
       <button
         class="btn btn-link btn-sm text-danger delete-conversation-btn"
