@@ -17,38 +17,6 @@ Management{% endblock %} {% block content %}
     </div>
   </div>
 
-  <!-- Search Form -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title">Search Documents</h5>
-      <form id="searchForm" class="mb-3">
-        {% csrf_token %}
-        <div class="row">
-          <div class="col-md-8">
-            <input
-              type="text"
-              class="form-control"
-              id="searchQuery"
-              placeholder="Enter your search query..."
-            />
-          </div>
-          <div class="col-md-2">
-            <select class="form-control" id="searchModel">
-              <option value="">Default Model</option>
-              {% for model_id, model_name in available_models %}
-              <option value="{{ model_id }}">{{ model_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
-          </div>
-        </div>
-      </form>
-      <div id="searchResults" class="mt-3"></div>
-    </div>
-  </div>
-
   <!-- Documents Table -->
   <div class="card">
     <div class="card-body">
@@ -139,77 +107,6 @@ Management{% endblock %} {% block content %}
 {% block extra_js %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchResults = document.getElementById("searchResults");
-
-    searchForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const query = document.getElementById("searchQuery").value;
-      const model = document.getElementById("searchModel").value;
-
-      if (!query) {
-        searchResults.innerHTML =
-          '<div class="alert alert-warning">Please enter a search query.</div>';
-        return;
-      }
-
-      // Show loading state
-      searchResults.innerHTML =
-        '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-
-      // Send search request
-      fetch('{% url "documents:search_documents" %}', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
-            .value,
-        },
-        body: new URLSearchParams({
-          query: query,
-          model: model,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            searchResults.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-            return;
-          }
-
-          if (data.results.length === 0) {
-            searchResults.innerHTML =
-              '<div class="alert alert-info">No results found.</div>';
-            return;
-          }
-
-          // Display results
-          const resultsHtml = data.results
-            .map(
-              (result) => `
-        <div class="card mb-2">
-          <div class="card-body">
-            <p class="card-text">${result.content}</p>
-            <small class="text-muted">
-              From: ${result.metadata.filename} (Chunk ${
-                result.metadata.chunk_index + 1
-              })
-              <br>
-              Similarity: ${(1 - result.distance).toFixed(2)}
-            </small>
-          </div>
-        </div>
-      `,
-            )
-            .join("");
-
-          searchResults.innerHTML = resultsHtml;
-        })
-        .catch((error) => {
-          searchResults.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
-        });
-    });
-
     // Add delete document functionality
     document.querySelectorAll(".delete-document").forEach((button) => {
       button.addEventListener("click", function () {
