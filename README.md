@@ -2,6 +2,12 @@
 
 A Django-based Retrieval-Augmented Generation (RAG) chatbot application. This project integrates Django with a RAG pipeline to provide intelligent, context-aware chat capabilities, document management, and user authentication.
 
+## Demo video
+
+https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
+
+
+
 ## Features
 
 - User authentication and registration
@@ -9,8 +15,6 @@ A Django-based Retrieval-Augmented Generation (RAG) chatbot application. This pr
 - Document upload and processing
 - Persistent conversation history
 - Admin interface for managing users and documents
-
-## Demo video
 
 ## Project Structure
 
