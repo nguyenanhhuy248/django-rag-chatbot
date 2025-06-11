@@ -1,16 +1,16 @@
 # django-chatbot-rag
 
-A Django-based Retrieval-Augmented Generation (RAG) chatbot application. This project integrates Django with a RAG pipeline to provide intelligent, context-aware chat capabilities, document management, and user authentication.
+A Django-based Retrieval-Augmented Generation (RAG) chatbot application that provides intelligent, context-aware conversations.
+Users can upload and manage their own documents, which are used as context for the chatbot's responses.
+Each user's conversation history and context documents are securely stored and persist across sessions.
 
 ## Demo video
 
 https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
 
-
-
 ## Features
 
-- User authentication and registration
+- User registration/ log in
 - Chat interface with RAG-powered responses
 - Document upload and processing
 - Persistent conversation history
@@ -62,7 +62,8 @@ https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
 
 ### Configuration
 
-- Edit `src/config/settings.toml` and `src/core/settings.py` for custom settings.
+- Edit `src/config/settings.toml` for custom settings.
+- Create a `src/config/.secrets.toml` and add an openrouter.ai API key.
 - Uploaded documents are stored in `src/media/documents/` by default.
 
 ## Usage
