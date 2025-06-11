@@ -1,7 +1,9 @@
 # django-chatbot-rag
 
 A Django-based Retrieval-Augmented Generation (RAG) chatbot application that provides intelligent, context-aware conversations.
+
 Users can upload and manage their own documents, which are used as context for the chatbot's responses.
+
 Each user's conversation history and context documents are securely stored and persist across sessions.
 
 ## Demo video
