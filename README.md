@@ -91,3 +91,31 @@ MIT License
 - Django
 - ChromaDB
 - DeepSeek V3 0324 (via https://openrouter.ai/)
+
+## Production Deployment with Docker
+
+This project includes a `Dockerfile` ready for production use with Gunicorn as the WSGI server.
+
+To run the Django server in a production environment using Docker:
+
+1. Build the Docker image:
+   ```bash
+   docker build -t django-rag-chatbot .
+   ```
+2. Run the container (replace `<your-secret-key>` and configure environment variables as needed):
+   ```bash
+   docker run -d \
+     -e DJANGO_SECRET_KEY=<your-secret-key> \
+     -e DJANGO_ALLOWED_HOSTS=yourdomain.com \
+     -p 8000:8000 \
+     -v $(pwd)/src/media:/app/src/media \
+     --name rag-chatbot \
+     django-rag-chatbot
+   ```
+   - The `DJANGO_SECRET_KEY` and `DJANGO_ALLOWED_HOSTS` environment variables are required for production security.
+   - The `-v $(pwd)/src/media:/app/src/media` option mounts the media directory for persistent file uploads.
+3. Static files are automatically collected during the build process and served from `/app/static/`.
+4. By default, the container starts Gunicorn with 3 workers. You can adjust this in the `Dockerfile` or override the `CMD` as needed.
+5. For a full production setup, use a reverse proxy (e.g., Nginx) in front of the container to handle SSL termination and serve static/media files efficiently.
+
+See the `Dockerfile` for build details and customize as required for your environment.
