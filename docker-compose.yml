@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  django:
+    build: .
+    container_name: rag-chatbot
+    environment:
+      - DJANGO_SECRET_KEY=your-secret-key
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/media:/app/src/media
+    depends_on:
+      - hfei
+
+  hfei:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    container_name: hfei-reranker
+    command: --model-id BAAI/bge-reranker-base
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/data
+    platform: linux/amd64
+    restart: unless-stopped
