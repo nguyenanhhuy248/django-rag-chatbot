@@ -6,7 +6,9 @@ from __future__ import annotations
 
 from typing import Callable
 
+import requests
 from chat.chat_client import ChatClient
+from config.config import dynaconf_settings
 from documents.processors import DocumentProcessor
 
 
@@ -14,6 +16,25 @@ def chat_client(prompt: str, api_key: str | None = None, model: str | None = Non
     """Send a chat prompt to the model and return the response."""
     client = ChatClient(api_key=api_key, model=model)
     return client.chat(prompt)
+
+
+def rerank_with_hfei(query: str, docs: list[dict], endpoint: str) -> list[dict]:
+    """
+    Rerank retrieved docs using a local HuggingFace Embedding Inference (HFEI)
+    reranker server.
+    """
+    if not docs:
+        return []
+    payload = {
+        'query': query,
+        'documents': [d['content'] for d in docs],
+    }
+    response = requests.post(endpoint, json=payload, timeout=10)
+    response.raise_for_status()
+    ranks = response.json().get('scores', [])
+    # Pair each doc with its score, then sort
+    reranked = sorted(zip(docs, ranks), key=lambda x: x[1], reverse=True)
+    return [doc for doc, _ in reranked]
 
 
 def build_rag_chain(
@@ -40,9 +61,17 @@ def build_rag_chain(
             'Answer:'
         )
 
+    use_hfei_reranker = dynaconf_settings.get('use_hfei_reranker', False)
+
     def rag_fn(question: str) -> str:
-        """Retrieve documents and generate an answer using the chat client."""
+        """
+        Retrieve documents, rerank (if enabled), and generate an answer using the chat client.
+        """
         docs = retriever(question, 4)
+        if use_hfei_reranker:
+            docs = rerank_with_hfei(
+                question, docs, endpoint=dynaconf_settings.get('hfei_endpoint'),
+            )
         context = '\n'.join(
             f"Document: {d['metadata'].get('filename', 'Unknown')}\nContent: {d['content']}"
             for d in docs
