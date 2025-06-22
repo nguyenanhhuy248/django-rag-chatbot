@@ -20,6 +20,7 @@ langchain-community = "^0.3.23"
 langchain-huggingface = "^0.2.0"
 openai = "^1.82.1"
 gunicorn = "^23.0.0"
+requests = "^2.32.4"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
