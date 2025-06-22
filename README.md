@@ -37,8 +37,9 @@ https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
 - Python 3.11+
 - [Poetry](https://python-poetry.org/) for dependency management
 - SQLite (default) or another supported database
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) (for containerized setup)
 
-### Installation
+### Installation (Local Development)
 
 1. Clone the repository:
    ```bash
@@ -65,14 +66,14 @@ https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
 ### Configuration
 
 - Edit `src/config/settings.toml` for custom settings.
-- Create a `src/config/.secrets.toml` and add an openrouter.ai API key.
+- Create a `src/config/.secrets.toml` and add your OpenRouter API key and any other secrets.
 - Uploaded documents are stored in `src/media/documents/` by default.
 
 ## Usage
 
-- Access the app at `http://127.0.0.1:8000/`
+- Access the app at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 - Register or log in to use the chatbot and document features.
-- Admin interface: `http://127.0.0.1:8000/admin/`
+- Admin interface: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
 
 ## Testing
 
@@ -81,6 +82,53 @@ Run tests with:
 ```bash
 poetry run python src/manage.py test
 ```
+
+## Running with Docker Compose
+
+This project provides a `docker-compose.yml` for easy local development and production setup, including the HuggingFace Embedding Inference (HFEI) reranker service.
+
+### Quick Start
+
+1. Clone the repository:
+   ```bash
+   git clone <repo-url>
+   cd django-rag-chatbot
+   ```
+2. Create a `src/config/.secrets.toml` file and add your secrets (e.g., `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, OpenRouter API key, etc.).
+3. Start all services (Django app and HFEI reranker):
+
+   ```bash
+   docker compose up --build
+   ```
+
+   This will:
+
+   - Build and start the Django RAG chatbot server
+   - Start the HuggingFace reranker server (HFEI) at `http://127.0.0.1:8080/rerank`
+
+4. Access the app at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+### Secrets and Environment Variables
+
+- All secrets and sensitive configuration should be placed in `src/config/.secrets.toml` (not `.env`).
+- Example `src/config/.secrets.toml`:
+  ```toml
+  DJANGO_SECRET_KEY = "your-secret-key"
+  DJANGO_ALLOWED_HOSTS = "localhost,127.0.0.1"
+  openrouter_api_key = "your-openrouter-key"
+  ```
+
+### Stopping the Services
+
+```bash
+docker compose down
+```
+
+### Notes
+
+- Uploaded documents are stored in `src/media/documents/` (mounted as a volume).
+- The HFEI reranker uses the `BAAI/bge-reranker-base` model by default. You can change the model in `docker-compose.yml` if needed.
+- For production, review and adjust secrets, environment variables, and Docker settings as appropriate.
 
 ## License
 
@@ -91,31 +139,4 @@ MIT License
 - Django
 - ChromaDB
 - DeepSeek V3 0324 (via https://openrouter.ai/)
-
-## Production Deployment with Docker
-
-This project includes a `Dockerfile` ready for production use with Gunicorn as the WSGI server.
-
-To run the Django server in a production environment using Docker:
-
-1. Build the Docker image:
-   ```bash
-   docker build -t django-rag-chatbot .
-   ```
-2. Run the container (replace `<your-secret-key>` and configure environment variables as needed):
-   ```bash
-   docker run -d \
-     -e DJANGO_SECRET_KEY=<your-secret-key> \
-     -e DJANGO_ALLOWED_HOSTS=yourdomain.com \
-     -p 8000:8000 \
-     -v $(pwd)/src/media:/app/src/media \
-     --name rag-chatbot \
-     django-rag-chatbot
-   ```
-   - The `DJANGO_SECRET_KEY` and `DJANGO_ALLOWED_HOSTS` environment variables are required for production security.
-   - The `-v $(pwd)/src/media:/app/src/media` option mounts the media directory for persistent file uploads.
-3. Static files are automatically collected during the build process and served from `/app/static/`.
-4. By default, the container starts Gunicorn with 3 workers. You can adjust this in the `Dockerfile` or override the `CMD` as needed.
-5. For a full production setup, use a reverse proxy (e.g., Nginx) in front of the container to handle SSL termination and serve static/media files efficiently.
-
-See the `Dockerfile` for build details and customize as required for your environment.
+- HuggingFace Text Embeddings Inference
