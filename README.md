@@ -14,6 +14,8 @@ https://github.com/user-attachments/assets/df813c78-3b9b-4d88-aa85-8c6f8b269c81
 
 - User registration/ log in
 - Chat interface with RAG-powered responses
+- ChormaDB as Vector Database
+- Reranker with BAAI/bge-reranker-base model via HuggingFace Text Embedding Inference  
 - Document upload and processing
 - Persistent conversation history
 - Admin interface for managing users and documents
@@ -140,3 +142,4 @@ MIT License
 - ChromaDB
 - DeepSeek V3 0324 (via https://openrouter.ai/)
 - HuggingFace Text Embeddings Inference
+- BAAI/bge-reranker-base
